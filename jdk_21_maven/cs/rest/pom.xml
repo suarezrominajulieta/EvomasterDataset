@@ -13,6 +13,7 @@
 
 
     <modules>
+        <module>movies-xml</module>
         <module>person-controller</module>
     </modules>
 

@@ -193,6 +193,7 @@ SUTS = [
     Sut("languagetool",  JDK_8),
     Sut("market",  JDK_11),
     Sut("microcks", JDK_21),
+    Sut("movies-xml", JDK_21),
     Sut("ocvn",  JDK_8),
     Sut("ohsome-api", JDK_17),
     Sut("pay-publicapi",JDK_11),
@@ -279,7 +280,7 @@ JACOCO_CLI = "not-defined"
 
 if JACOCO:
 
-    JACOCO_LOCATION = WFD + "/jacoco"
+    JACOCO_LOCATION = WFD_DIR + "/jacoco"
 
     JACOCO_AGENT = os.path.join(JACOCO_LOCATION, "jacocoagent.jar")
     JACOCO_CLI   = os.path.join(JACOCO_LOCATION, "jacococli.jar")
@@ -814,8 +815,15 @@ def getConfigs():
     # CONFIGS.append(foo)
     # CONFIGS.append(bar)
 
+    ### XML support feature flag: ON (current behaviour) vs OFF (pre-feature behaviour)
+    XML_ON = ParameterSetting("enableXmlSupport", ["true"])
+    XML_OFF = ParameterSetting("enableXmlSupport", ["false"])
+
+    CONFIGS.append(Config([XML_ON], "xml-on"))
+    CONFIGS.append(Config([XML_OFF], "xml-off"))
+
     ### Alternatively, an empty config will just use the default configurations in EM
-    CONFIGS.append(Config([], "EXP"))
+    # CONFIGS.append(Config([], "EXP"))
 
     return CONFIGS
 

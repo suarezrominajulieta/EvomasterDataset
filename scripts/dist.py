@@ -286,6 +286,9 @@ def build_jdk_21_maven():
     folder = "jdk_21_maven"
     callMaven(folder, JAVA_HOME_21)
 
+    copy(folder + "/cs/rest/movies-xml/target/movies-xml-sut.jar", DIST)
+    copy(folder + "/em/external/rest/movies-xml/target/movies-xml-evomaster-runner.jar", DIST)
+
     copy(folder + "/cs/rest/person-controller/target/person-controller-sut.jar", DIST)
     copy(folder + "/em/external/rest/person-controller/target/person-controller-evomaster-runner.jar", DIST)
 
