@@ -11,7 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OrderColumn;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -46,7 +46,13 @@ public class Movie {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "movie_cast", joinColumns = @JoinColumn(name = "movie_id"))
-    @OrderColumn(name = "cast_order")
+    /*
+        Deliberately NOT an @OrderColumn. With one, a row carrying an arbitrary index (which is
+        what direct SQL insertion produces) makes Hibernate fail to rehydrate the list, and every
+        read that touches that movie answers 500. Ordering by billing keeps the document order
+        the API documents, without an index the database is free to hold garbage in.
+     */
+    @OrderBy("billing")
     private List<Actor> cast = new ArrayList<>();
 
     public Long getId() {

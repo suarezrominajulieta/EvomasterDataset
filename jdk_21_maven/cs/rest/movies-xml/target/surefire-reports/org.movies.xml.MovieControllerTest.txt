@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.movies.xml.MovieControllerTest
+-------------------------------------------------------------------------------
+Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.072 s -- in org.movies.xml.MovieControllerTest

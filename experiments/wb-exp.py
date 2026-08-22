@@ -816,8 +816,8 @@ def getConfigs():
     # CONFIGS.append(bar)
 
     ### XML support feature flag: ON (current behaviour) vs OFF (pre-feature behaviour)
-    XML_ON = ParameterSetting("enableXmlSupport", ["true"])
-    XML_OFF = ParameterSetting("enableXmlSupport", ["false"])
+    XML_ON = ParameterSetting("enableXmlWithAttributesSupport", ["true"])
+    XML_OFF = ParameterSetting("enableXmlWithAttributesSupport", ["false"])
 
     CONFIGS.append(Config([XML_ON], "xml-on"))
     CONFIGS.append(Config([XML_OFF], "xml-off"))
