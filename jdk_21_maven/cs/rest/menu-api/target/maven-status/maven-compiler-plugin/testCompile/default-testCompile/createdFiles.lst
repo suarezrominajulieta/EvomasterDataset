@@ -1,0 +1,16 @@
+org\menu\api\MenuApiTestBase.class
+org\menu\api\CrudTest.class
+org\menu\api\MultipartUploadTest$UploadFoodImage.class
+org\menu\api\MultipartUploadTest$CsvImport.class
+org\menu\api\JsonPatchTest$Pictures.class
+org\menu\api\MultipartUploadTest$PicturesPerDish.class
+org\menu\api\MultipartUploadTest$FileRules.class
+org\menu\api\FileStorageServiceTest.class
+org\menu\api\AllergenSheetTest.class
+org\menu\api\MultipartUploadTest$CategoryIcon.class
+org\menu\api\JsonPatchTest.class
+org\menu\api\MultipartUploadTest$BatchWithJsonPart.class
+org\menu\api\MultipartUploadTest$ReplaceContent.class
+org\menu\api\MultipartUploadTest$SinglePicture.class
+org\menu\api\MultipartUploadTest.class
+org\menu\api\JsonPatchTest$Categories.class

@@ -1,0 +1,2557 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "menu-api",
+    "description": "A restaurant menu API, loosely ported from the .NET Menu.API of the EvoMaster benchmark. It exists to be fuzzed: the multipart upload endpoints and the JSON Patch endpoints both fan out into many distinguishable status codes on purpose.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Info",
+      "description": "Liveness, in the plainest form there is"
+    },
+    {
+      "name": "Categories",
+      "description": "The sections a menu is divided into"
+    },
+    {
+      "name": "Foods",
+      "description": "The dishes on the menu, and their pictures"
+    },
+    {
+      "name": "Currency",
+      "description": "The ISO 4217 codes a dish may be priced in"
+    },
+    {
+      "name": "FoodPictures",
+      "description": "The pictures attached to dishes"
+    }
+  ],
+  "paths": {
+    "/api/v1/Foods/{id}": {
+      "get": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "One dish, with its category and pictures",
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dish",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Replace a dish",
+        "description": "Answers 304 when the document matches what is already stored.",
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The stored dish",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Nothing in the document differed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The document is not acceptable, or its id disagrees with the path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "deletedPictures names a picture that is not attached to this dish",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Delete a dish and its pictures",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Gone"
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Patch a dish (RFC 6902)",
+        "description": "name, description, recept, price, currency and categoryId can move.",
+        "operationId": "patch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "A JSON Patch document",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JsonPatchOperationDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The patched dish",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The patch is malformed, or produced a document of the wrong shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The patch reaches for an immutable field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The patch does not apply, or names a category that does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The patched document breaks a rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/FoodPictures/{id}/content": {
+      "put": {
+        "tags": [
+          "FoodPictures"
+        ],
+        "summary": "Replace a picture's bytes",
+        "description": "A multipart body on a PUT rather than a POST, which is the point of this endpoint existing at all.",
+        "operationId": "replaceContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PictureContentForm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The picture, now pointing at the new file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodPictureDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The file part is missing, empty or nameless",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No picture with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The file is too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The file is not an accepted image type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The bytes do not match the extension",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Categories/{id}": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "One category",
+        "operationId": "getById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No category with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Replace a category",
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The stored category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The document is not acceptable, or its id disagrees with the path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No category with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Delete a category, and with it its dishes and their pictures",
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Gone"
+          },
+          "404": {
+            "description": "No category with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Patch a category (RFC 6902)",
+        "description": "Only name and color can move; id and iconPath are the server's.",
+        "operationId": "patch_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "A JSON Patch document",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JsonPatchOperationDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The patched category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The patch is malformed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The patch reaches for an immutable field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No category with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The patch does not apply to this document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The patched document breaks a rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods": {
+      "get": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "A page of dishes",
+        "description": "The original took count and skip as optional path segments, which collided with the id route and made GET /Foods/{id} unreachable. They are query parameters here.",
+        "operationId": "getAll",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many dishes to return, at most 200",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "description": "How many to skip first",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FoodDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "count or skip is out of range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Create a dish",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created, with a Location header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The document is not acceptable, or names a category that does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods/{id}/pictures/batch": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Attach several pictures, described by a JSON part",
+        "description": "File parts next to an object part that travels as its own application/json section, as the encoding block says. The caption count has to match the file count, which is a branch only a correctly serialised JSON part reaches.",
+        "operationId": "uploadPictureBatch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchPicturesForm"
+              },
+              "encoding": {
+                "files": {
+                  "contentType": "image/jpeg, image/png, image/gif, image/webp"
+                },
+                "metadata": {
+                  "contentType": "application/json"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "What was stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A part is missing or unreadable, or the caption count does not match the file count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Two files share a name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Too many files, or one of them too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The metadata part did not arrive as application/json, or a file is not an accepted image type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A file's bytes do not match its extension",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods/{id}/picture": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Attach one picture, with an optional caption and position",
+        "description": "One file part next to two optional primitive parts.",
+        "operationId": "uploadPicture",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SinglePictureForm"
+              },
+              "encoding": {
+                "caption": {
+                  "contentType": "text/plain"
+                },
+                "displayOrder": {
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The stored picture",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodPictureDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The file part is missing, empty, nameless, or displayOrder is not an integer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The file is too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The file is not an accepted image type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The bytes do not match the extension, or the caption or displayOrder is out of range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods/{id}/allergens": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Upload the allergen sheet of a dish, as a PDF",
+        "description": "One file part pinned to application/pdf by the encoding block. It has to start with %PDF- and carry a %%EOF trailer near the end; a second upload replaces the first. Its twin is the category icon: same shape, but that one wants a PNG, whose signature a text-encoded body cannot carry and this one's can.",
+        "operationId": "uploadAllergenSheet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AllergenSheetForm"
+              },
+              "encoding": {
+                "sheet": {
+                  "contentType": "application/pdf"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The dish, with allergenSheetPath set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The sheet part is missing, empty or nameless",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The sheet is too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The sheet part did not arrive as application/pdf, or is not a .pdf file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No PDF header, or a header with no trailer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods/import": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Import dishes from a CSV",
+        "description": "A text/csv file part next to a boolean part. The CSV has the same format as src/main/resources/setup/dishes.csv, commas inside a description written as colons. With dryRun the document is parsed and checked but nothing is stored.",
+        "operationId": "importFoods",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodsImportForm"
+              },
+              "encoding": {
+                "csv": {
+                  "contentType": "text/csv"
+                },
+                "dryRun": {
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "What was imported, or would have been",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The CSV is not this format, or dryRun is not a boolean",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A row names a category that does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The CSV is too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The csv part did not arrive as text/csv",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A row breaks a rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Foods/UploadFoodImage": {
+      "post": {
+        "tags": [
+          "Foods"
+        ],
+        "summary": "Attach pictures to a dish named by a text part",
+        "description": "The shape the .NET original had: an array of file parts next to a plain text part carrying the dish id.",
+        "operationId": "uploadFoodImage",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFoodImageForm"
+              },
+              "encoding": {
+                "files": {
+                  "contentType": "image/jpeg, image/png, image/gif, image/webp"
+                },
+                "foodId": {
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "What was stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "foodId is missing or not a UUID, or a file part is empty or nameless",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Two files share a name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Too many files, or one of them too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "A file is not an accepted image type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A file's bytes do not match its extension",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Every category",
+        "operationId": "getAll_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Create a category",
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created, with a Location header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The document is not acceptable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Categories/{id}/icon": {
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Upload a category icon",
+        "description": "The icon part has to arrive as image/png, as the encoding block says.",
+        "operationId": "uploadIcon",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryIconForm"
+              },
+              "encoding": {
+                "icon": {
+                  "contentType": "image/png"
+                },
+                "color": {
+                  "contentType": "text/plain"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The category, with iconPath set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A part is missing, empty, or not a file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The filename carries a path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No category with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The icon is too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "The icon part did not arrive as image/png",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The bytes are not a PNG",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/FoodPictures/{id}": {
+      "get": {
+        "tags": [
+          "FoodPictures"
+        ],
+        "summary": "One picture, in full",
+        "operationId": "getById_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The picture",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodPictureDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No picture with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "FoodPictures"
+        ],
+        "summary": "Detach a picture and delete its file",
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Gone"
+          },
+          "404": {
+            "description": "No picture with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "FoodPictures"
+        ],
+        "summary": "Patch a picture (RFC 6902)",
+        "description": "Only caption and displayOrder can move; everything that describes the stored file is the server's.",
+        "operationId": "patch_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "A JSON Patch document",
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JsonPatchOperationDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The patched picture",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodPictureDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The patch is malformed, or produced a document of the wrong shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The patch reaches for an immutable field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No picture with that id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The patch does not apply to this document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The patched document breaks a rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Currency": {
+      "get": {
+        "tags": [
+          "Currency"
+        ],
+        "summary": "Every known currency",
+        "operationId": "getAll_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CurrencyDto"
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Currency/{code}": {
+      "get": {
+        "tags": [
+          "Currency"
+        ],
+        "summary": "One currency by code",
+        "description": "Case insensitive, as the original lookup was. The original had this lookup but never exposed it.",
+        "operationId": "getByCode",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The currency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrencyDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No currency with that code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Info": {
+      "get": {
+        "tags": [
+          "Info"
+        ],
+        "summary": "The name of this API, as plain text",
+        "operationId": "index",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not supported on this path",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Body sent in a media type this path does not take",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Server assigned. Ignored on POST, and immutable afterwards.",
+            "format": "uuid"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "example": "Salads"
+          },
+          "color": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "example": "White"
+          },
+          "iconPath": {
+            "type": "string",
+            "description": "Public path of the uploaded icon. Read only; set by the icon upload.",
+            "example": "/pictures/1700000000000_...-icon.png"
+          }
+        },
+        "description": "A menu category, such as Salads or Desert"
+      },
+      "FoodDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Server assigned. Ignored on POST, and immutable afterwards.",
+            "format": "uuid"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "example": "House Salad"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "recept": {
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": "string",
+            "description": "The recipe, spelled the way the .NET original spelled it"
+          },
+          "pictures": {
+            "type": "array",
+            "description": "Read only; pictures are attached through the upload endpoints",
+            "items": {
+              "$ref": "#/components/schemas/FoodPictureDto"
+            }
+          },
+          "price": {
+            "type": "number",
+            "example": 9.99
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryDto"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO code, has to be one listed by /api/v1/Currency",
+            "example": "USD"
+          },
+          "deletedPictures": {
+            "type": "array",
+            "description": "Pictures to detach, honoured on PUT only",
+            "items": {
+              "$ref": "#/components/schemas/FoodPictureDto"
+            }
+          },
+          "allergenSheetPath": {
+            "type": "string",
+            "description": "Public path of the allergen sheet. Read only; set by the PDF upload.",
+            "example": "/pictures/1700000000000_...-allergens.pdf"
+          }
+        },
+        "description": "A dish on the menu"
+      },
+      "FoodPictureDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Public path of the stored file",
+            "example": "/pictures/1.jpg"
+          }
+        },
+        "description": "A picture attached to a dish"
+      },
+      "ErrorDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "description": "What every failed request answers with"
+      },
+      "PictureContentForm": {
+        "required": [
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The new image file",
+            "format": "binary"
+          }
+        },
+        "description": "The replacement image"
+      },
+      "FoodPictureDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Read only",
+            "example": "/pictures/1.jpg"
+          },
+          "originalFileName": {
+            "type": "string",
+            "description": "The name the client sent. Read only."
+          },
+          "length": {
+            "type": "integer",
+            "description": "Size in bytes. Read only.",
+            "format": "int64"
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Read only",
+            "example": "image/jpeg"
+          },
+          "caption": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "example": "front view"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "foodId": {
+            "type": "string",
+            "description": "The dish this picture belongs to. Read only.",
+            "format": "uuid"
+          }
+        },
+        "description": "A stored picture, in full"
+      },
+      "BatchPicturesForm": {
+        "required": [
+          "files",
+          "metadata"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "description": "One or more image files",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/PictureMetadataDto"
+          }
+        },
+        "description": "Several pictures plus a JSON metadata part"
+      },
+      "PictureMetadataDto": {
+        "type": "object",
+        "properties": {
+          "captions": {
+            "type": "array",
+            "description": "One caption per uploaded file, in order",
+            "items": {
+              "type": "string",
+              "example": "front"
+            }
+          },
+          "replaceExisting": {
+            "type": "boolean",
+            "description": "Detach the dish's existing pictures before attaching these",
+            "example": false
+          }
+        },
+        "description": "Metadata travelling as a JSON part alongside the files"
+      },
+      "UploadResultDto": {
+        "type": "object",
+        "properties": {
+          "uploaded": {
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "totalBytes": {
+            "type": "integer",
+            "description": "Total bytes accepted",
+            "format": "int64"
+          },
+          "pictures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FoodPictureDto"
+            }
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Set when the request only validated and stored nothing"
+          }
+        },
+        "description": "What an upload endpoint answers with on success"
+      },
+      "SinglePictureForm": {
+        "required": [
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The image file",
+            "format": "binary"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Free text shown under the picture",
+            "example": "front view"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "description": "Position in the gallery",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "description": "One picture, with optional caption and ordering"
+      },
+      "AllergenSheetForm": {
+        "required": [
+          "sheet"
+        ],
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "description": "A PDF: starts with %PDF- and ends with a %%EOF trailer",
+            "format": "binary"
+          }
+        },
+        "description": "The allergen sheet of a dish, as a PDF"
+      },
+      "FoodsImportForm": {
+        "required": [
+          "csv"
+        ],
+        "type": "object",
+        "properties": {
+          "csv": {
+            "type": "string",
+            "description": "CSV with the header DishID,Type,Name,Description,Price",
+            "format": "binary"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "description": "Parse and validate without storing anything",
+            "example": false,
+            "default": false
+          }
+        },
+        "description": "A CSV of dishes, and whether to only validate it"
+      },
+      "ImportResult": {
+        "type": "object",
+        "properties": {
+          "imported": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "foods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FoodDto"
+            }
+          }
+        }
+      },
+      "UploadFoodImageForm": {
+        "required": [
+          "files",
+          "foodId"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "description": "One or more image files",
+            "items": {
+              "type": "string",
+              "description": "An image file. Each part carries its own filename.",
+              "format": "binary"
+            }
+          },
+          "foodId": {
+            "type": "string",
+            "description": "Id of the dish the pictures belong to",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "description": "Several pictures plus the dish they belong to"
+      },
+      "CategoryIconForm": {
+        "required": [
+          "icon"
+        ],
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "description": "The icon. Has to arrive as image/png.",
+            "format": "binary"
+          },
+          "color": {
+            "type": "string",
+            "description": "Colour name stored on the category",
+            "example": "White"
+          }
+        },
+        "description": "A category icon and the colour to file it under"
+      },
+      "JsonPatchOperationDto": {
+        "required": [
+          "op",
+          "path"
+        ],
+        "type": "object",
+        "properties": {
+          "op": {
+            "type": "string",
+            "example": "replace",
+            "enum": [
+              "add",
+              "remove",
+              "replace",
+              "move",
+              "copy",
+              "test"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "JSON Pointer into the entity, e.g. /name, /price, /currency, /color",
+            "example": "/price"
+          },
+          "value": {
+            "type": "object",
+            "description": "The value for add, replace and test. Any JSON type.",
+            "example": 12.5
+          },
+          "from": {
+            "type": "string",
+            "description": "Source pointer, required by move and copy only",
+            "example": "/name"
+          }
+        },
+        "description": "A single JSON Patch (RFC 6902) operation"
+      },
+      "CurrencyDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "USD"
+          },
+          "name": {
+            "type": "string",
+            "example": "United States Dollar"
+          }
+        },
+        "description": "An ISO 4217 currency"
+      }
+    }
+  }
+}
